@@ -16,7 +16,7 @@ function initials(name: string): string {
 
 function mapApiItem(raw: Record<string, unknown>): ExploreItem {
   const type = raw._type as "blog" | "itinerary";
-  const authorObj = raw.author as { username?: string } | null;
+  const authorObj = raw.author as { _id?: string; username?: string } | null;
   const authorName = authorObj?.username ?? "Anonymous";
 
   const coverUrl =
@@ -36,7 +36,7 @@ function mapApiItem(raw: Record<string, unknown>): ExploreItem {
     title:       raw.title as string,
     description: raw.description as string,
     coverUrl,
-    author:      { name: authorName, initials: initials(authorName) },
+    author:      { id: authorObj?._id, name: authorName, initials: initials(authorName) },
     meta,
     viewCount:   (raw.viewCount as number) ?? 0,
     savedByMe:   false,

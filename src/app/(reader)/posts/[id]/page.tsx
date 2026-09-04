@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import DOMPurify from "isomorphic-dompurify";
 import StatusBadge from "@/components/creator/shared/StatusBadge";
+import FollowButton from "@/components/profile/FollowButton";
 import { BLOG } from "@/lib/api/endpoints";
 import { useAuth } from "@/context/AuthContext";
 import type { PostDetail } from "@/types/content";
@@ -66,6 +67,10 @@ function mapApiPost(data: Record<string, unknown>): PostDetail {
     typeof authorObj === "object" && authorObj !== null
       ? (authorObj.name as string) ?? "Unknown"
       : "Unknown";
+  const authorId =
+    typeof authorObj === "object" && authorObj !== null
+      ? (authorObj._id as string) ?? undefined
+      : undefined;
 
   const rawImageUrl = data.imageUrl as string | undefined;
   const coverUrl = rawImageUrl ?? undefined;
@@ -81,6 +86,7 @@ function mapApiPost(data: Record<string, unknown>): PostDetail {
     createdAt: data.createdAt as string,
     viewCount: data.viewCount as number | undefined,
     author: authorName,
+    authorId,
   };
 }
 
@@ -169,9 +175,21 @@ export default function BlogDetailPage() {
 
           <div className="blog-detail-byline">
             {post.author && (
-              <span className="blog-detail-byline-item">
-                <UserIcon />
-                {post.author}
+              post.authorId ? (
+                <Link href={`/profile/${post.authorId}`} className="blog-detail-byline-item blog-detail-byline-author">
+                  <UserIcon />
+                  {post.author}
+                </Link>
+              ) : (
+                <span className="blog-detail-byline-item">
+                  <UserIcon />
+                  {post.author}
+                </span>
+              )
+            )}
+            {post.authorId && (
+              <span className="blog-detail-byline-follow">
+                <FollowButton userId={post.authorId} size="sm" />
               </span>
             )}
             <span className="blog-detail-byline-sep" aria-hidden="true">·</span>

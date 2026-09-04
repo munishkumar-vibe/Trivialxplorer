@@ -10,6 +10,7 @@ export default function AdminBlogsPage() {
       pendingUrl={ADMIN.BLOGS_PENDING}
       approveUrl={ADMIN.BLOG_APPROVE}
       rejectUrl={ADMIN.BLOG_REJECT}
+      contentType="blog"
     />
   );
 }

@@ -10,6 +10,7 @@ export default function AdminItinerariesPage() {
       pendingUrl={ADMIN.ITINS_PENDING}
       approveUrl={ADMIN.ITIN_APPROVE}
       rejectUrl={ADMIN.ITIN_REJECT}
+      contentType="itinerary"
     />
   );
 }

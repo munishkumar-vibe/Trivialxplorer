@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const PROTECTED = ["/dashboard", "/posts", "/itineraries", "/explore", "/saved", "/admin"];
+const PROTECTED = ["/dashboard", "/posts", "/itineraries", "/explore", "/saved", "/admin", "/profile"];
 const AUTH_ONLY = ["/login", "/register"];
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000";
@@ -70,6 +70,7 @@ export const config = {
     "/explore/:path*",
     "/saved/:path*",
     "/admin/:path*",
+    "/profile/:path*",
     "/login",
     "/register",
   ],

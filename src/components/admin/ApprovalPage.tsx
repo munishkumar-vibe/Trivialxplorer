@@ -2,11 +2,12 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
+import ReviewModal, { type ReviewContentType } from "./ReviewModal";
 
 export interface PendingItem {
   _id: string;
   title: string;
-  author?: { name?: string; username?: string } | null;
+  author?: { username?: string; firstName?: string; lastName?: string } | null;
   createdAt?: string;
 }
 
@@ -15,6 +16,8 @@ interface ApprovalPageProps {
   pendingUrl: string;
   approveUrl: (id: string) => string;
   rejectUrl:  (id: string) => string;
+  /** Content type — enables the in-page View preview modal. */
+  contentType: ReviewContentType;
 }
 
 function fmt(iso?: string) {
@@ -22,7 +25,7 @@ function fmt(iso?: string) {
   return new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 }
 
-export default function ApprovalPage({ title, pendingUrl, approveUrl, rejectUrl }: ApprovalPageProps) {
+export default function ApprovalPage({ title, pendingUrl, approveUrl, rejectUrl, contentType }: ApprovalPageProps) {
   const { accessToken } = useAuth();
   const [items,   setItems]   = useState<PendingItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,6 +34,8 @@ export default function ApprovalPage({ title, pendingUrl, approveUrl, rejectUrl 
   const [rejectTarget, setRejectTarget] = useState<string | null>(null);
   const [reason,       setReason]       = useState("");
   const [submitting,   setSubmitting]   = useState(false);
+
+  const [previewId, setPreviewId] = useState<string | null>(null);
 
   const load = useCallback(() => {
     if (!accessToken) return;
@@ -47,21 +52,27 @@ export default function ApprovalPage({ title, pendingUrl, approveUrl, rejectUrl 
 
   useEffect(() => { load(); }, [load]);
 
-  async function handleApprove(id: string) {
+  // Shared approve/reject — used by both the table row and the preview modal.
+  const doApprove = useCallback(async (id: string) => {
     if (!accessToken) return;
     await fetch(approveUrl(id), { method: "PATCH", headers: { Authorization: `Bearer ${accessToken}` } });
     setItems((prev) => prev.filter((i) => i._id !== id));
-  }
+  }, [accessToken, approveUrl]);
 
-  async function handleRejectSubmit() {
-    if (!rejectTarget || !accessToken) return;
-    setSubmitting(true);
-    await fetch(rejectUrl(rejectTarget), {
+  const doReject = useCallback(async (id: string, why: string) => {
+    if (!accessToken) return;
+    await fetch(rejectUrl(id), {
       method: "PATCH",
       headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ reason }),
+      body: JSON.stringify({ reason: why }),
     });
-    setItems((prev) => prev.filter((i) => i._id !== rejectTarget));
+    setItems((prev) => prev.filter((i) => i._id !== id));
+  }, [accessToken, rejectUrl]);
+
+  async function handleRejectSubmit() {
+    if (!rejectTarget) return;
+    setSubmitting(true);
+    await doReject(rejectTarget, reason);
     setRejectTarget(null);
     setReason("");
     setSubmitting(false);
@@ -97,13 +108,18 @@ export default function ApprovalPage({ title, pendingUrl, approveUrl, rejectUrl 
                     <td>{item.title}</td>
                     <td>
                       <span className="approval-author">
-                        {item.author?.name ?? item.author?.username ?? "Unknown"}
+                        {item.author?.username
+                          ?? (item.author?.firstName ? `${item.author.firstName} ${item.author.lastName ?? ""}`.trim() : null)
+                          ?? "Unknown"}
                       </span>
                     </td>
                     <td><span className="approval-date">{fmt(item.createdAt)}</span></td>
                     <td>
                       <div className="approval-actions">
-                        <button className="btn-approve" onClick={() => handleApprove(item._id)}>
+                        <button className="btn-view" onClick={() => setPreviewId(item._id)}>
+                          View
+                        </button>
+                        <button className="btn-approve" onClick={() => doApprove(item._id)}>
                           Approve
                         </button>
                         <button className="btn-reject" onClick={() => { setRejectTarget(item._id); setReason(""); }}>
@@ -142,6 +158,16 @@ export default function ApprovalPage({ title, pendingUrl, approveUrl, rejectUrl 
             </div>
           </div>
         </div>
+      )}
+
+      {previewId && (
+        <ReviewModal
+          contentType={contentType}
+          itemId={previewId}
+          onClose={() => setPreviewId(null)}
+          onApprove={async (id) => { await doApprove(id); setPreviewId(null); }}
+          onReject={async (id, why) => { await doReject(id, why); setPreviewId(null); }}
+        />
       )}
     </div>
   );

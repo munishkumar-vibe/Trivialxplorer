@@ -20,6 +20,7 @@ export const ITINERARY = {
 export const VIDEO = {
   CREATE: `${API_BASE_URL}/api/video`,
   LIST:   `${API_BASE_URL}/api/video`,
+  GET:    (id: string) => `${API_BASE_URL}/api/video/${id}`,
 } as const;
 
 export const EXPLORE = {
@@ -39,6 +40,18 @@ export const ADMIN = {
   VIDEO_REJECT:  (id: string) => `${API_BASE_URL}/api/admin/videos/${id}/reject`,
 } as const;
 
+export const FOLLOW = {
+  FOLLOW:    (id: string) => `${API_BASE_URL}/api/follow/${id}`, // POST follow / DELETE unfollow
+  STATUS:    (id: string) => `${API_BASE_URL}/api/follow/${id}/status`,
+  FOLLOWERS: (id: string) => `${API_BASE_URL}/api/follow/${id}/followers`,
+  FOLLOWING: (id: string) => `${API_BASE_URL}/api/follow/${id}/following`,
+} as const;
+
+export const USERS = {
+  PROFILE: (id: string) => `${API_BASE_URL}/api/users/${id}`,
+  BLOGS:   (id: string) => `${API_BASE_URL}/api/users/${id}/blogs`,
+} as const;
+
 export const AUTH = {
   SIGNIN:          `${API_BASE_URL}/api/auth/signin`,
   SIGNUP:          `${API_BASE_URL}/api/auth/signup`,
@@ -48,4 +61,5 @@ export const AUTH = {
   REFRESH_TOKEN:   `${API_BASE_URL}/api/auth/refresh-token`,
   VERIFY:          `${API_BASE_URL}/api/auth/verify`,
   ME:              `${API_BASE_URL}/api/auth/me`,
+  ME_STATS:        `${API_BASE_URL}/api/auth/me/stats`,
 } as const;
