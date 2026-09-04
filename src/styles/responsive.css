@@ -1,0 +1,181 @@
+/* ================================================
+   RESPONSIVE — TABLET  ≤ 1024px
+   ================================================ */
+
+@media (max-width: 1024px) {
+  .about-inner {
+    gap: 3.5rem;
+  }
+}
+
+/* ================================================
+   RESPONSIVE — SMALL TABLET  ≤ 900px
+   ================================================ */
+
+@media (max-width: 900px) {
+  .about-inner {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+
+  .about-img-block {
+    order: -1;
+  }
+
+  .about-photo {
+    aspect-ratio: 16 / 9;
+  }
+
+  /* Narrow the centre gap on tablet */
+  .trail-step {
+    grid-template-columns: minmax(0, 1fr) 160px minmax(0, 1fr);
+    margin-bottom: 4rem;
+  }
+
+  /* Gallery: 2 columns, reset 3n+2 zigzag, re-apply even-card zigzag */
+  .tg-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .tg-card:nth-child(3n+2) {
+    margin-top: 0;
+  }
+
+  .tg-card:nth-child(even) {
+    margin-top: 60px;
+  }
+
+  /* Keep size variation readable at 2-col */
+  .tg-card:nth-child(3n) .tg-card-img-wrap {
+    aspect-ratio: 3 / 4;
+  }
+}
+
+/* ================================================
+   RESPONSIVE — MOBILE  ≤ 768px
+   ================================================ */
+
+@media (max-width: 768px) {
+  /* Navbar */
+  .navbar-nav {
+    display: none;
+  }
+
+  .navbar-inner {
+    padding: 0 1.25rem;
+    gap: 1rem;
+  }
+
+  /* Hero */
+  .hero-content {
+    margin-top: -2rem;
+  }
+
+  /* Footer */
+  .footer-top {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+
+  .footer-nav {
+    gap: 2.5rem;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+  }
+}
+
+/* ================================================
+   RESPONSIVE — MOBILE  ≤ 640px
+   ================================================ */
+
+@media (max-width: 640px) {
+  /* Gallery cards — narrower + shorter on small mobile */
+  .gallery-card {
+    width: 200px;
+    height: 280px;
+  }
+
+  /* About stats */
+  .about-stats {
+    gap: 1rem;
+  }
+
+  .about {
+    padding: 5rem 1.25rem;
+  }
+
+  /* Trail section — stack vertically on mobile */
+  .trail-section {
+    padding: 5rem 1.25rem 6rem;
+  }
+
+  .trail-step {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+    margin-bottom: 3rem;
+  }
+
+  .trail-step--left .trail-card,
+  .trail-step--right .trail-card {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .trail-step--left .trail-gap,
+  .trail-step--right .trail-gap {
+    grid-column: 1;
+    grid-row: 1;
+    justify-content: center;
+    padding: 0;
+    padding-bottom: 1.25rem;
+  }
+
+  .trail-svg {
+    display: none;
+  }
+
+  /* Trek Gallery — single column, kill all zigzag offsets */
+  .tg-section {
+    padding: 5rem 1.25rem 6rem;
+  }
+
+  .tg-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Remove all margin-top zigzag offsets at single column */
+  .tg-card:nth-child(n) {
+    margin-top: 0;
+  }
+
+  /* Landscape ratio works better at full mobile width */
+  .tg-card .tg-card-img-wrap,
+  .tg-card:nth-child(3n) .tg-card-img-wrap {
+    aspect-ratio: 4 / 3;
+  }
+
+  /* Footer */
+  .footer {
+    padding: 3rem 1.25rem 2rem;
+  }
+}
+
+/* ================================================
+   RESPONSIVE — SMALL MOBILE  ≤ 480px
+   ================================================ */
+
+@media (max-width: 480px) {
+  .navbar-login-btn {
+    padding: 0 12px;
+    font-size: 0.8rem;
+  }
+
+  .footer-nav {
+    flex-direction: column;
+    gap: 2rem;
+  }
+}
