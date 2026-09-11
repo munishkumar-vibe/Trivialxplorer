@@ -36,6 +36,21 @@ export interface FollowPerson {
   isSelf: boolean;
 }
 
+// A single, generic notification. The `type` string drives rendering via the
+// frontend config map — adding a new type never changes this shape.
+export interface NotificationItem {
+  id: string;
+  type: string;
+  isRead: boolean;
+  createdAt: string;
+  actor: { id: string; username: string; name: string } | null;
+  entityType: string;
+  entityId: string | null;
+  // Populated target document (fields vary by entityType); the config reads
+  // whatever it needs per type.
+  entity: Record<string, unknown> | null;
+}
+
 export type ExploreContentType = "blog" | "itinerary" | "video";
 
 export interface ExploreItem {

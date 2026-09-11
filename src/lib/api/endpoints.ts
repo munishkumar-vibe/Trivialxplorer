@@ -6,6 +6,7 @@ export const BLOG = {
   CREATE: `${API_BASE_URL}/api/blog`,
   LIST:   `${API_BASE_URL}/api/blog`,
   GET:    (id: string) => `${API_BASE_URL}/api/blog/${id}`,
+  NEXT:   (id: string) => `${API_BASE_URL}/api/blog/${id}/next`,
   UPDATE: (id: string) => `${API_BASE_URL}/api/blog/${id}`,
   DELETE: (id: string) => `${API_BASE_URL}/api/blog/${id}`,
 } as const;
@@ -45,6 +46,19 @@ export const FOLLOW = {
   STATUS:    (id: string) => `${API_BASE_URL}/api/follow/${id}/status`,
   FOLLOWERS: (id: string) => `${API_BASE_URL}/api/follow/${id}/followers`,
   FOLLOWING: (id: string) => `${API_BASE_URL}/api/follow/${id}/following`,
+} as const;
+
+export const LIKE = {
+  LIKE:     (id: string) => `${API_BASE_URL}/api/like/${id}`, // POST like / DELETE unlike
+  STATUS:   (id: string) => `${API_BASE_URL}/api/like/${id}/status`,
+  STATUSES: (ids: string[]) => `${API_BASE_URL}/api/like/status?postIds=${ids.join(",")}`,
+} as const;
+
+export const NOTIFICATION = {
+  LIST:         `${API_BASE_URL}/api/notifications`,
+  UNREAD_COUNT: `${API_BASE_URL}/api/notifications/unread-count`,
+  READ:         (id: string) => `${API_BASE_URL}/api/notifications/${id}/read`,
+  READ_ALL:     `${API_BASE_URL}/api/notifications/read-all`,
 } as const;
 
 export const USERS = {

@@ -3,8 +3,10 @@
 import { useState, useMemo, useEffect } from "react";
 import ExploreCard from "./ExploreCard";
 import { useAuth } from "@/context/AuthContext";
-import { EXPLORE } from "@/lib/api/endpoints";
+import { EXPLORE, LIKE } from "@/lib/api/endpoints";
 import type { ExploreContentType, ExploreItem } from "@/types/content";
+
+interface LikeState { likeCount: number; likedByMe: boolean; }
 
 type Filter = "all" | ExploreContentType;
 
@@ -111,6 +113,7 @@ export default function ExploreGrid() {
   const [query,     setQuery]     = useState("");
   const [filter,    setFilter]    = useState<Filter>("all");
   const [saved,     setSaved]     = useState<Set<string>>(() => new Set());
+  const [likeMap,   setLikeMap]   = useState<Record<string, LikeState>>({});
 
   useEffect(() => {
     if (status === "loading") return;
@@ -126,7 +129,24 @@ export default function ExploreGrid() {
         });
         if (!res.ok) throw new Error("fetch failed");
         const result = await res.json();
-        setAllItems((result.data as Record<string, unknown>[]).map(mapApiItem));
+        const mapped = (result.data as Record<string, unknown>[]).map(mapApiItem);
+        setAllItems(mapped);
+
+        // Batch-fetch like state for all blog posts in ONE request ($in on the
+        // backend) — never one request per card.
+        const blogIds = mapped.filter((i) => i.type === "blog").map((i) => i.id);
+        if (blogIds.length > 0) {
+          try {
+            const lr = await fetch(LIKE.STATUSES(blogIds), {
+              credentials: "include",
+              headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            const lres = await lr.json();
+            if (lr.ok) setLikeMap((lres.data as Record<string, LikeState>) ?? {});
+          } catch {
+            /* like state is non-critical; cards fall back to their own fetch */
+          }
+        }
       } catch {
         setError(true);
       } finally {
@@ -231,6 +251,8 @@ export default function ExploreGrid() {
                 isHero={idx === 0}
                 savedByMe={saved.has(item.id)}
                 onBookmarkToggle={toggleBookmark}
+                initialLiked={likeMap[item.id]?.likedByMe}
+                initialLikeCount={likeMap[item.id]?.likeCount}
               />
             </div>
           ))}

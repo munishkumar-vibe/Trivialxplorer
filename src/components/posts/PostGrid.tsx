@@ -1,8 +1,13 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useDashboard } from "@/context/DashboardContext";
+import { useAuth } from "@/context/AuthContext";
+import { LIKE } from "@/lib/api/endpoints";
 import PostCard, { type PostItem } from "./PostCard";
 import type { ContentCard } from "@/types/creator";
+
+interface LikeState { likeCount: number; likedByMe: boolean; }
 
 function toPostItem(card: ContentCard): PostItem {
   const wordCount = card.content
@@ -62,6 +67,29 @@ function EmptyState({ onCreateClick }: { onCreateClick: () => void }) {
 
 export default function PostGrid() {
   const { items, isLoadingContent, openForm } = useDashboard();
+  const { accessToken } = useAuth();
+  const [likeMap, setLikeMap] = useState<Record<string, LikeState>>({});
+
+  // Batch-fetch like state for all posts in ONE request ($in), then hand each
+  // card its initial state so no card fetches on its own.
+  useEffect(() => {
+    if (!accessToken || items.length === 0) return;
+    const ids = items.map((i) => i.id);
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(LIKE.STATUSES(ids), {
+          credentials: "include",
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        const result = await res.json();
+        if (!cancelled && res.ok) setLikeMap((result.data as Record<string, LikeState>) ?? {});
+      } catch {
+        /* like state is non-critical */
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [items, accessToken]);
 
   if (isLoadingContent) {
     return (
@@ -79,7 +107,11 @@ export default function PostGrid() {
     <div className="post-grid" role="list" aria-label="Your posts">
       {items.map((item) => (
         <div key={item.id} role="listitem">
-          <PostCard {...toPostItem(item)} />
+          <PostCard
+            {...toPostItem(item)}
+            initialLiked={likeMap[item.id]?.likedByMe}
+            initialLikeCount={likeMap[item.id]?.likeCount}
+          />
         </div>
       ))}
     </div>

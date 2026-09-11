@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import type { ExploreItem } from "@/types/content";
+import LikeButton from "@/components/like/LikeButton";
 
 function BlogIcon() {
   return (
@@ -23,14 +24,6 @@ function MapIcon() {
   );
 }
 
-function EyeIcon() {
-  return (
-    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" />
-    </svg>
-  );
-}
-
 function BookmarkIcon({ filled }: { filled: boolean }) {
   return (
     <svg width="14" height="14" viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -42,18 +35,17 @@ function BookmarkIcon({ filled }: { filled: boolean }) {
 const TYPE_LABELS = { blog: "Blog", itinerary: "Itinerary" } as const;
 const TYPE_ICONS  = { blog: <BlogIcon />, itinerary: <MapIcon /> };
 
-function formatCount(n: number): string {
-  return n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n);
-}
-
 interface ExploreCardProps extends ExploreItem {
   onBookmarkToggle: (id: string) => void;
   isHero?: boolean;
+  /** Pre-fetched like state (batched by the grid) so cards skip per-card fetches. */
+  initialLiked?: boolean;
+  initialLikeCount?: number;
 }
 
 export default function ExploreCard({
-  id, type, title, description, coverUrl, author, meta, viewCount,
-  savedByMe, onBookmarkToggle, isHero,
+  id, type, title, description, coverUrl, author, meta,
+  savedByMe, onBookmarkToggle, isHero, initialLiked, initialLikeCount,
 }: ExploreCardProps) {
   const router = useRouter();
 
@@ -132,7 +124,9 @@ export default function ExploreCard({
 
           <div className="explore-card-footer">
             {authorBlock(true)}
-            <span className="explore-card-views"><EyeIcon />{formatCount(viewCount)}</span>
+            {type === "blog" && (
+              <LikeButton postId={id} size="sm" initialLiked={initialLiked} initialCount={initialLikeCount} />
+            )}
           </div>
         </div>
       </article>
@@ -158,7 +152,9 @@ export default function ExploreCard({
           {authorBlock(false)}
           <div className="explore-card-stats">
             <span className="explore-card-meta">{meta}</span>
-            <span className="explore-card-views"><EyeIcon />{formatCount(viewCount)}</span>
+            {type === "blog" && (
+              <LikeButton postId={id} size="sm" initialLiked={initialLiked} initialCount={initialLikeCount} />
+            )}
           </div>
         </div>
       </div>

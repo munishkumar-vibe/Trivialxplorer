@@ -6,12 +6,13 @@ import About from "@/components/About/About";
 import Features from "@/components/Features/Features";
 import TrekGallery from "@/components/TrekGallery/TrekGallery";
 import Footer from "@/components/Footer/Footer";
+import RedirectIfAuth from "@/components/auth/RedirectIfAuth";
 
 export default function Page() {
   const images = getHikingImages();
 
   return (
-    <>
+    <RedirectIfAuth>
       <Navbar />
       <main>
         <Hero />
@@ -21,6 +22,6 @@ export default function Page() {
         <TrekGallery />
       </main>
       <Footer />
-    </>
+    </RedirectIfAuth>
   );
 }

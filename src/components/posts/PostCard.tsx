@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import StatusBadge from "@/components/creator/shared/StatusBadge";
+import LikeButton from "@/components/like/LikeButton";
 import { useDashboard } from "@/context/DashboardContext";
 import type { ContentStatus } from "@/types/creator";
 
@@ -16,6 +17,9 @@ export interface PostItem {
   viewCount?: number;
   content?: string;
   author?: string;
+  /** Pre-fetched like state (batched by the grid) so cards skip per-card fetches. */
+  initialLiked?: boolean;
+  initialLikeCount?: number;
 }
 
 function BlogIcon() {
@@ -25,15 +29,6 @@ function BlogIcon() {
       <polyline points="14 2 14 8 20 8" />
       <line x1="16" y1="13" x2="8" y2="13" />
       <line x1="16" y1="17" x2="8" y2="17" />
-    </svg>
-  );
-}
-
-function EyeIcon() {
-  return (
-    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-      <circle cx="12" cy="12" r="3" />
     </svg>
   );
 }
@@ -89,13 +84,7 @@ function formatRelativeDate(iso: string): string {
   return new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 }
 
-function formatCount(n?: number): string {
-  if (n === undefined) return "";
-  if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
-  return String(n);
-}
-
-export default function PostCard({ id, title, description, coverUrl, readingTimeMin, status, createdAt, viewCount, content, author }: PostItem) {
+export default function PostCard({ id, title, description, coverUrl, readingTimeMin, status, createdAt, viewCount, content, author, initialLiked, initialLikeCount }: PostItem) {
   const router = useRouter();
   const { openEditForm } = useDashboard();
 
@@ -156,12 +145,9 @@ export default function PostCard({ id, title, description, coverUrl, readingTime
         <div className="post-card-meta">
           <StatusBadge status={status} />
           <span className="post-card-date">{formatRelativeDate(createdAt)}</span>
-          {viewCount !== undefined && (
-            <span className="post-card-views">
-              <EyeIcon />
-              {formatCount(viewCount)}
-            </span>
-          )}
+          <span className="post-card-like" onClick={stopPropagation}>
+            <LikeButton postId={id} size="sm" initialLiked={initialLiked} initialCount={initialLikeCount} />
+          </span>
         </div>
       </div>
 
