@@ -6,7 +6,8 @@ import Link from "next/link";
 import DOMPurify from "isomorphic-dompurify";
 import StatusBadge from "@/components/creator/shared/StatusBadge";
 import FollowButton from "@/components/profile/FollowButton";
-import { BLOG } from "@/lib/api/endpoints";
+import LikeButton from "@/components/like/LikeButton";
+import { BLOG, LIKE } from "@/lib/api/endpoints";
 import { useAuth } from "@/context/AuthContext";
 import type { PostDetail } from "@/types/content";
 
@@ -15,6 +16,15 @@ function ArrowLeftIcon() {
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <line x1="19" y1="12" x2="5" y2="12" />
       <polyline points="12 19 5 12 12 5" />
+    </svg>
+  );
+}
+
+function ArrowRightIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <line x1="5" y1="12" x2="19" y2="12" />
+      <polyline points="12 5 19 12 12 19" />
     </svg>
   );
 }
@@ -33,6 +43,14 @@ function ClockIcon() {
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <circle cx="12" cy="12" r="10" />
       <polyline points="12 6 12 12 16 14" />
+    </svg>
+  );
+}
+
+function HeartIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 1 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z" />
     </svg>
   );
 }
@@ -100,6 +118,64 @@ export default function BlogDetailPage() {
   const [post, setPost] = useState<PostDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+
+  // Like state is lifted here so the top byline can show the count while the
+  // interactive button lives in the footer — both stay in sync.
+  const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
+  const [likeReady, setLikeReady] = useState(false);
+
+  useEffect(() => {
+    if (!id || !accessToken) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(LIKE.STATUS(id as string), {
+          credentials: "include",
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        const result = await res.json();
+        if (!cancelled && res.ok) {
+          setLiked(Boolean(result.data?.likedByMe));
+          setLikeCount(Number(result.data?.likeCount ?? 0));
+        }
+      } catch {
+        /* leave defaults */
+      } finally {
+        if (!cancelled) setLikeReady(true);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [id, accessToken]);
+
+  function handleLikeChange(next: boolean) {
+    setLiked(next);
+    setLikeCount((c) => c + (next ? 1 : -1));
+  }
+
+  const [nextLoading, setNextLoading] = useState(false);
+
+  async function goToNextPost() {
+    if (!id || nextLoading) return;
+    setNextLoading(true);
+    try {
+      const res = await fetch(BLOG.NEXT(id as string), {
+        credentials: "include",
+        headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+      });
+      const result = await res.json();
+      const nextId = result.data?.id as string | null;
+      if (nextId) {
+        router.push(`/posts/${nextId}`);
+      } else {
+        router.push("/posts");
+      }
+    } catch {
+      router.push("/posts");
+    } finally {
+      setNextLoading(false);
+    }
+  }
 
   useEffect(() => {
     if (!id) return;
@@ -208,6 +284,11 @@ export default function BlogDetailPage() {
               <ClockIcon />
               {post.readingTimeMin} min read
             </span>
+            <span className="blog-detail-byline-sep" aria-hidden="true">·</span>
+            <span className="blog-detail-byline-item">
+              <HeartIcon />
+              {likeCount} {likeCount === 1 ? "like" : "likes"}
+            </span>
           </div>
         </div>
       </div>
@@ -230,14 +311,35 @@ export default function BlogDetailPage() {
 
       {/* ── Footer ────────────────────────────────── */}
       <div className="blog-detail-footer">
-        <button
-          type="button"
-          className="btn-ghost blog-detail-back-footer"
-          onClick={() => router.back()}
-        >
-          <ArrowLeftIcon />
-          Back to Posts
-        </button>
+        <div className="blog-detail-footer-left">
+          {likeReady && (
+            <LikeButton
+              postId={post.id}
+              initialLiked={liked}
+              initialCount={likeCount}
+              onChange={handleLikeChange}
+            />
+          )}
+        </div>
+        <div className="blog-detail-footer-right">
+          <button
+            type="button"
+            className="btn-ghost blog-detail-back-footer"
+            onClick={() => router.back()}
+          >
+            <ArrowLeftIcon />
+            Back to Posts
+          </button>
+          <button
+            type="button"
+            className="btn-primary blog-detail-next-btn"
+            onClick={goToNextPost}
+            disabled={nextLoading}
+          >
+            {nextLoading ? "Loading…" : "Next Post"}
+            <ArrowRightIcon />
+          </button>
+        </div>
       </div>
 
     </div>

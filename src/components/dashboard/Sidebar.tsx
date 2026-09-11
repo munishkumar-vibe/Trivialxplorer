@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import ProfileCard from "./ProfileCard";
+import GuideModal from "@/components/guide/GuideModal";
 import { useAuth } from "@/context/AuthContext";
 import { ADMIN } from "@/lib/api/endpoints";
 
@@ -88,6 +89,16 @@ function IconApprove() {
   );
 }
 
+function IconGuide() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="10" />
+      <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+      <line x1="12" y1="17" x2="12.01" y2="17" />
+    </svg>
+  );
+}
+
 const MAIN_LINKS = [
   { label: "Dashboard", href: "/dashboard", icon: <IconDashboard />, badge: null },
   { label: "Explore", href: "/explore", icon: <IconExplore />, badge: null },
@@ -108,6 +119,7 @@ export default function Sidebar() {
   const { data, accessToken } = useAuth();
   const isAdmin = data?.user?.role === "admin";
   const [counts, setCounts] = useState<PendingCounts>({ blogs: 0, itineraries: 0, videos: 0, total: 0 });
+  const [guideOpen, setGuideOpen] = useState(false);
 
   useEffect(() => {
     if (!isAdmin || !accessToken) return;
@@ -156,6 +168,15 @@ export default function Sidebar() {
         <NavItem key={link.href} {...link} />
       ))}
 
+      <button
+        type="button"
+        className="sidebar-nav-item sidebar-nav-item--button"
+        onClick={() => setGuideOpen(true)}
+      >
+        <IconGuide />
+        <span className="sidebar-nav-label">Guide</span>
+      </button>
+
       {isAdmin && (
         <>
           <p className="sidebar-section-label" style={{ marginTop: "1.5rem" }}>Approvals</p>
@@ -167,6 +188,8 @@ export default function Sidebar() {
 
       <div className="sidebar-spacer" />
       <ProfileCard />
+
+      {guideOpen && <GuideModal onClose={() => setGuideOpen(false)} />}
     </aside>
   );
 }

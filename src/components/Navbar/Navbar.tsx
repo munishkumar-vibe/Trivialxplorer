@@ -7,6 +7,7 @@ import { useTheme } from "@/theme/ThemeContext";
 import type { ThemeKey } from "@/theme/theme.config";
 import CreateButton from "@/components/creator/CreateButton";
 import ProfileModal from "@/components/profile/ProfileModal";
+import NotificationBell from "@/components/notifications/NotificationBell";
 
 function SunIcon() {
   return (
@@ -118,6 +119,7 @@ export default function Navbar({ variant = "landing" }: NavbarProps) {
 
           <div className="navbar-actions">
             {variant === "dashboard" && <CreateButton variant="navbar" />}
+            {variant === "dashboard" && <NotificationBell />}
             <button
               className="navbar-theme-btn"
               type="button"
