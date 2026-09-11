@@ -212,6 +212,99 @@ button {
   box-shadow: 0 4px 18px color-mix(in srgb, var(--color-accent) 45%, transparent);
 }
 
+/* Hamburger button — hidden on desktop */
+.navbar-hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: transparent;
+  gap: 5px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.navbar-hamburger-bar {
+  display: block;
+  width: 18px;
+  height: 1.5px;
+  background: var(--color-text);
+  border-radius: 2px;
+  transition: transform 0.2s, opacity 0.2s;
+  position: relative;
+}
+
+.navbar-hamburger-bar::before,
+.navbar-hamburger-bar::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  width: 18px;
+  height: 1.5px;
+  background: var(--color-text);
+  border-radius: 2px;
+  transition: transform 0.22s, top 0.22s;
+}
+
+.navbar-hamburger-bar::before { top: -5px; }
+.navbar-hamburger-bar::after  { top:  5px; }
+
+.navbar-hamburger-bar--open               { background: transparent; }
+.navbar-hamburger-bar--open::before       { top: 0; transform: rotate(45deg); }
+.navbar-hamburger-bar--open::after        { top: 0; transform: rotate(-45deg); }
+
+/* Mobile drawer — rendered by React only when menuOpen=true */
+.navbar-mobile-menu {
+  position: fixed;
+  top: 58px;
+  left: 0;
+  right: 0;
+  z-index: 99;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  padding: 0.75rem 1rem 1.25rem;
+  gap: 0.25rem;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+}
+
+.navbar-mobile-link {
+  display: block;
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  border-radius: 8px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.navbar-mobile-link:hover {
+  background: var(--color-surface-2);
+  color: var(--color-text);
+}
+
+.navbar-mobile-link--cta {
+  margin-top: 0.5rem;
+  background: var(--color-accent);
+  color: #fff;
+  font-weight: 700;
+  text-align: center;
+}
+
+.navbar-mobile-link--cta:hover {
+  filter: brightness(1.08);
+  color: #fff;
+}
+
+@media (max-width: 768px) {
+  .navbar-hamburger { display: flex; }
+}
+
 /* ================================================
    HERO
    ================================================ */
@@ -687,6 +780,12 @@ button {
   margin: 0 auto;
 }
 
+/* ── Trail mobile (static fallback, hidden on desktop) ── */
+
+.trail-mobile {
+  display: none;
+}
+
 /* ── SVG overlay ────────────────────────────────── */
 
 .trail-svg {
@@ -757,15 +856,19 @@ button {
 
 .trail-step:last-child { margin-bottom: 0; }
 
-/* LEFT step: card in col 1, gap in col 2, image in col 3 */
-.trail-step--left .trail-card       { grid-column: 1; }
-.trail-step--left .trail-gap        { grid-column: 2; justify-content: flex-start; }
-.trail-step--left .trail-image-wrap { grid-column: 3; }
+/* Outer wrappers carry the zigzag offset — GSAP animates the inner divs */
+.trail-card-outer  { width: 100%; }
+.trail-image-outer { width: 100%; }
 
-/* RIGHT step: image in col 1, gap in col 2, card in col 3 */
-.trail-step--right .trail-card       { grid-column: 3; }
-.trail-step--right .trail-gap        { grid-column: 2; justify-content: flex-end; }
-.trail-step--right .trail-image-wrap { grid-column: 1; }
+/* LEFT step: card-outer col1, gap col2, image-outer col3 */
+.trail-step--left .trail-card-outer  { grid-column: 1; }
+.trail-step--left .trail-gap         { grid-column: 2; justify-content: flex-start; }
+.trail-step--left .trail-image-outer { grid-column: 3; padding-top: 5rem; }
+
+/* RIGHT step: image-outer col1, gap col2, card-outer col3 */
+.trail-step--right .trail-card-outer  { grid-column: 3; padding-top: 5rem; }
+.trail-step--right .trail-gap         { grid-column: 2; justify-content: flex-end; }
+.trail-step--right .trail-image-outer { grid-column: 1; }
 
 /* ── Centre gap (holds node anchor) ─────────────── */
 
@@ -1315,6 +1418,195 @@ button {
   0%   { transform: scaleY(0); opacity: 0; }
   40%  { opacity: 1; }
   100% { transform: scaleY(1); opacity: 0; margin-top: 20px; }
+}
+
+/* ================================================
+   RESPONSIVE — 1024px (tablet landscape)
+   ================================================ */
+
+@media (max-width: 1024px) {
+  /* Navbar */
+  .navbar-inner { padding: 0 1.5rem; gap: 1.5rem; }
+  .navbar-nav { gap: 0; }
+  .navbar-link { padding: 7px 10px; font-size: 0.82rem; }
+
+  /* About */
+  .about-inner { gap: 3rem; }
+
+  /* Features */
+  .trail-body { padding: 0 1rem; }
+  .trail-step { grid-template-columns: minmax(0, 1fr) 100px minmax(0, 1fr); }
+  .trail-gap { padding: 0 0.25rem; }
+  .trail-card { padding: 1.75rem 1.75rem 1.5rem; }
+
+  /* TrekGallery */
+  .tg-grid { gap: 1rem; }
+}
+
+/* ================================================
+   RESPONSIVE — 800px (hide GSAP map, show static)
+   ================================================ */
+
+@media (max-width: 800px) {
+  /* Hide the full GSAP trail map */
+  .trail-body { display: none; }
+
+  /* Show the simple mobile cards */
+  .trail-mobile {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .trail-mobile-card {
+    border-radius: 16px;
+    overflow: hidden;
+    background: var(--card-bg, rgba(255,255,255,0.04));
+    border: 1px solid var(--border, rgba(255,255,255,0.08));
+  }
+
+  .trail-mobile-card-img {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+  }
+
+  .trail-mobile-card-body {
+    padding: 1.5rem 1.5rem 1.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .trail-mobile-card-body .trail-card-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    opacity: 0.45;
+  }
+
+  .trail-mobile-card-body .feature-icon {
+    margin-top: 0.25rem;
+    color: var(--accent, #4ade80);
+  }
+
+  .trail-mobile-card-body .feature-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    line-height: 1.3;
+    margin: 0;
+  }
+
+  .trail-mobile-card-body .feature-desc {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    opacity: 0.7;
+    margin: 0;
+  }
+}
+
+/* ================================================
+   RESPONSIVE — 768px (tablet portrait)
+   ================================================ */
+
+@media (max-width: 768px) {
+  /* Navbar */
+  .navbar-inner { padding: 0 1.25rem; gap: 1rem; }
+  .navbar-nav { display: none; }
+  .navbar-divider { display: none; }
+
+  /* Hero */
+  .hero-edge-mask {
+    box-shadow:
+      inset 0    80px 80px -10px rgba(11, 16, 14, 1),
+      inset 0   -80px 80px -10px rgba(11, 16, 14, 1),
+      inset  60px 0   80px -10px rgba(11, 16, 14, 1),
+      inset -60px 0   80px -10px rgba(11, 16, 14, 1);
+  }
+  .hero-content { padding: 0 1.25rem; margin-top: -2rem; }
+  .hero-subtext { font-size: 0.95rem; }
+
+  /* Carousel */
+  .carousel { padding: 3.5rem 0 4rem; }
+  .carousel-img-wrap { width: 220px; height: 155px; }
+
+  /* About */
+  .about { padding: 5rem 1.5rem; }
+  .about-inner {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+  .about-text { max-width: 100%; }
+  .about-img-block { max-width: 480px; margin: 0 auto; }
+  .about-photo-accent { display: none; }
+
+  /* Features — trail-body already hidden by 800px breakpoint above */
+  .trail-section { padding: 5rem 1.25rem 6rem; }
+  .trail-header { margin-bottom: 3rem; }
+
+  /* TrekGallery */
+  .tg-section { padding: 5rem 1.25rem 6rem; }
+  .tg-header { margin-bottom: 3rem; }
+  .tg-grid { grid-template-columns: repeat(2, 1fr); }
+  .tg-card:nth-child(3n+2) { margin-top: 0; }
+  .tg-card:nth-child(2n) { margin-top: 48px; }
+
+  /* Footer */
+  .footer { padding: 3rem 1.25rem 2rem; }
+  .footer-top {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+  .footer-nav { gap: 2.5rem; }
+  .footer-bottom { flex-direction: column; align-items: flex-start; gap: 0.4rem; }
+}
+
+/* ================================================
+   RESPONSIVE — 480px (mobile)
+   ================================================ */
+
+@media (max-width: 480px) {
+  /* Navbar */
+  .navbar-inner { height: 58px; padding: 0 1rem; }
+  .navbar-logo-wordmark { font-size: 0.95rem; }
+  .navbar-login-btn { padding: 0 14px; height: 34px; font-size: 0.8rem; }
+
+  /* Hero */
+  .hero-content { padding: 0 1rem; }
+  .hero-scroll-hint { display: none; }
+
+  /* Carousel */
+  .carousel { padding: 3rem 0; }
+  .carousel-header { padding: 0 1rem; margin-bottom: 2rem; }
+  .carousel-img-wrap { width: 180px; height: 126px; border-radius: 8px; }
+  .carousel-rows { gap: 10px; }
+
+  /* About */
+  .about { padding: 4rem 1rem; }
+  .about-stats { gap: 1rem; flex-wrap: wrap; }
+  .about-stat-num { font-size: 1.4rem; }
+
+  /* Features */
+  .trail-section { padding: 4rem 1rem 5rem; }
+  .trail-mobile { gap: 1.75rem; }
+  .trail-mobile-card-body { padding: 1.25rem; }
+
+  /* TrekGallery */
+  .tg-section { padding: 4rem 1rem 5rem; }
+  .tg-header { margin-bottom: 2.5rem; }
+  .tg-grid { grid-template-columns: 1fr; }
+  .tg-card:nth-child(2n) { margin-top: 0; }
+  .tg-card:nth-child(3n) .tg-card-img-wrap { aspect-ratio: 3 / 4; }
+
+  /* Footer */
+  .footer { padding: 2.5rem 1rem 1.5rem; }
+  .footer-nav { flex-direction: column; gap: 1.5rem; }
+  .footer-top { gap: 2rem; padding-bottom: 2rem; }
+  .footer-credit { display: none; }
 }
 
 /* ================================================

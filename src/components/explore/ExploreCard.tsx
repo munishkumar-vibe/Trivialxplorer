@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import type { ExploreItem } from "@/types/content";
 
 function BlogIcon() {
@@ -65,6 +66,26 @@ export default function ExploreCard({
     if (e.key === "Enter" || e.key === " ") { e.preventDefault(); navigate(); }
   }
 
+  const authorBlock = (heroVariant: boolean) => {
+    const inner = (
+      <>
+        <span className={`explore-card-avatar${heroVariant ? " explore-card-avatar--hero" : ""}`} aria-hidden="true">{author.initials}</span>
+        <span className="explore-card-author-name">@{author.name}</span>
+      </>
+    );
+    return author.id ? (
+      <Link
+        href={`/profile/${author.id}`}
+        className="explore-card-author explore-card-author--link"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {inner}
+      </Link>
+    ) : (
+      <div className="explore-card-author">{inner}</div>
+    );
+  };
+
   const thumb = (heroVariant: boolean) => (
     <div className={`explore-card-thumb${heroVariant ? " explore-card-thumb--hero" : ""}`}>
       {coverUrl ? (
@@ -110,10 +131,7 @@ export default function ExploreCard({
           <p className="explore-card-description explore-card-description--hero">{description}</p>
 
           <div className="explore-card-footer">
-            <div className="explore-card-author">
-              <span className="explore-card-avatar explore-card-avatar--hero" aria-hidden="true">{author.initials}</span>
-              <span className="explore-card-author-name">@{author.name}</span>
-            </div>
+            {authorBlock(true)}
             <span className="explore-card-views"><EyeIcon />{formatCount(viewCount)}</span>
           </div>
         </div>
@@ -137,10 +155,7 @@ export default function ExploreCard({
         <p className="explore-card-description">{description}</p>
 
         <div className="explore-card-footer">
-          <div className="explore-card-author">
-            <span className="explore-card-avatar" aria-hidden="true">{author.initials}</span>
-            <span className="explore-card-author-name">@{author.name}</span>
-          </div>
+          {authorBlock(false)}
           <div className="explore-card-stats">
             <span className="explore-card-meta">{meta}</span>
             <span className="explore-card-views"><EyeIcon />{formatCount(viewCount)}</span>

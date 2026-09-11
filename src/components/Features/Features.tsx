@@ -101,7 +101,7 @@ export default function Features() {
     const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReduced) return;
 
-    const isMobile = window.matchMedia("(max-width: 640px)").matches;
+    const isMobile = window.matchMedia("(max-width: 800px)").matches;
 
     // ── Mobile: simple per-card fade, skip all SVG animation ──────────
     if (isMobile) {
@@ -233,15 +233,14 @@ export default function Features() {
         <h2 className="features-heading">Built for how trekkers actually think</h2>
       </div>
 
+      {/* Desktop: full GSAP trail map — hidden below 800px via CSS */}
       <div ref={bodyRef} className="trail-body">
-        {/* SVG: background guide path + animated progress path + compass marker */}
         <svg ref={svgRef} className="trail-svg" aria-hidden="true">
           <path ref={pathBgRef} className="trail-path-bg" />
           <path ref={pathRef}   className="trail-path" />
           <g ref={markerRef} opacity="0">
             <circle r="20" className="trail-marker-pulse" />
             <circle r="12" className="trail-marker-badge" />
-            {/* Compass needle — N (white) / S (muted) */}
             <path d="M 0 -7 L 3.5 1 L 0 -1 L -3.5 1 Z" className="trail-marker-needle-n" />
             <path d="M 0  7 L 3.5 -1 L 0 1 L -3.5 -1 Z" className="trail-marker-needle-s" />
             <circle r="2" className="trail-marker-center" />
@@ -252,38 +251,45 @@ export default function Features() {
           const isRight = i % 2 !== 0;
           return (
             <div key={i} className={`trail-step trail-step--${isRight ? "right" : "left"}`}>
-              {/* Feature card */}
-              <div ref={(el) => { cardRefs.current[i] = el; }} className="trail-card">
-                <span className="trail-card-label">{f.label}</span>
-                <div className="feature-icon">{f.icon}</div>
-                <h3 className="feature-title">{f.title}</h3>
-                <p className="feature-desc">{f.desc}</p>
-                <span className="feature-badge">{f.tag}</span>
+              <div className="trail-card-outer">
+                <div ref={(el) => { cardRefs.current[i] = el; }} className="trail-card">
+                  <span className="trail-card-label">{f.label}</span>
+                  <div className="feature-icon">{f.icon}</div>
+                  <h3 className="feature-title">{f.title}</h3>
+                  <p className="feature-desc">{f.desc}</p>
+                  <span className="feature-badge">{f.tag}</span>
+                </div>
               </div>
-
-              {/* Centre gap — holds the junction node */}
               <div className="trail-gap">
-                <div
-                  ref={(el) => { nodeRefs.current[i] = el; }}
-                  className="trail-node"
-                >
+                <div ref={(el) => { nodeRefs.current[i] = el; }} className="trail-node">
                   <span className="trail-node-inner" />
                 </div>
               </div>
-
-              {/* Opposite-side image */}
-              <div ref={(el) => { imageRefs.current[i] = el; }} className="trail-image-wrap">
-                <Image
-                  src={f.image}
-                  alt={f.title}
-                  fill
-                  className="trail-image"
-                  sizes="(max-width: 768px) 100vw, 400px"
-                />
+              <div className="trail-image-outer">
+                <div ref={(el) => { imageRefs.current[i] = el; }} className="trail-image-wrap">
+                  <Image src={f.image} alt={f.title} fill className="trail-image" sizes="400px" />
+                </div>
               </div>
             </div>
           );
         })}
+      </div>
+
+      {/* Mobile: simple static cards — visible only below 800px via CSS */}
+      <div className="trail-mobile">
+        {FEATURES.map((f, i) => (
+          <div key={i} className="trail-mobile-card">
+            <div className="trail-mobile-card-img">
+              <Image src={f.image} alt={f.title} fill className="trail-image" sizes="100vw" />
+            </div>
+            <div className="trail-mobile-card-body">
+              <span className="trail-card-label">{f.label}</span>
+              <div className="feature-icon">{f.icon}</div>
+              <h3 className="feature-title">{f.title}</h3>
+              <p className="feature-desc">{f.desc}</p>
+            </div>
+          </div>
+        ))}
       </div>
     </section>
   );

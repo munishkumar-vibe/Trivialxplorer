@@ -11,6 +11,29 @@ export interface PostDetail {
   createdAt: string;
   viewCount?: number;
   author: string;
+  authorId?: string;
+}
+
+export interface UserProfile {
+  id: string;
+  name: string;
+  username: string;
+  role: "user" | "admin";
+  createdAt: string;
+  followerCount: number;
+  followingCount: number;
+  postCount: number;
+  isFollowing: boolean;
+  isSelf: boolean;
+}
+
+// A row in a followers / following list
+export interface FollowPerson {
+  id: string;
+  name: string;
+  username: string;
+  isFollowing: boolean;
+  isSelf: boolean;
 }
 
 export type ExploreContentType = "blog" | "itinerary" | "video";
@@ -21,7 +44,7 @@ export interface ExploreItem {
   title: string;
   description: string;
   coverUrl?: string;
-  author: { name: string; initials: string };
+  author: { id?: string; name: string; initials: string };
   meta: string;
   viewCount: number;
   savedByMe: boolean;

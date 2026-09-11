@@ -10,6 +10,7 @@ export default function AdminVideosPage() {
       pendingUrl={ADMIN.VIDEOS_PENDING}
       approveUrl={ADMIN.VIDEO_APPROVE}
       rejectUrl={ADMIN.VIDEO_REJECT}
+      contentType="video"
     />
   );
 }
